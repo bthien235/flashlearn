@@ -43,4 +43,8 @@ docker-compose.override.yml
 ### Claude ###
 .claude/
 
+### Deployment keys ###
+gha_vps_key
+gha_vps_key.pub
+
 

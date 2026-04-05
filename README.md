@@ -80,3 +80,5 @@ After that, every push to `main` will:
 - test backend
 - build + push image to GHCR
 - SSH to VPS and run `docker compose -f docker-compose.prod.yml pull app && docker compose -f docker-compose.prod.yml up -d`
+
+CI/CD smoke test note: update README to trigger workflow.
