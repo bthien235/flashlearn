@@ -36,6 +36,7 @@ Then create Pull Request:
   - Ignores `frontend/**`.
   - Builds and tests backend for `develop` and `main`.
   - Builds and pushes backend Docker image on push to `main`.
+  - Deploys to VPS over SSH on push to `main`.
 
 - Frontend CI: `.github/workflows/frontend-ci.yml`
   - Runs only when files in `frontend/**` change.
@@ -55,3 +56,27 @@ Configure branch protection rules in GitHub:
    - Require approvals (at least 1).
    - Require status checks to pass.
    - Disable direct pushes.
+
+## VPS auto deploy setup
+
+Pipeline deploy file: `docker-compose.prod.yml`.
+
+1. On VPS, create app folder and copy deploy files:
+   - `/opt/flashlearn/docker-compose.prod.yml`
+   - `/opt/flashlearn/.env` (production values)
+2. In VPS `.env`, set:
+   - `APP_IMAGE=ghcr.io/<your-org-or-user>/flashlearn-backend:latest`
+   - `DB_*`, `JWT_*`, `SPRING_PROFILES_ACTIVE=prod`, `APP_PORT`
+3. Add GitHub repository secrets:
+   - `VPS_HOST`: VPS IP/domain
+   - `VPS_PORT`: SSH port (use `22` if default SSH)
+   - `VPS_USER`: SSH username
+   - `VPS_SSH_KEY`: private SSH key (PEM)
+   - `VPS_APP_DIR`: deploy directory on VPS (example `/opt/flashlearn`)
+   - `GHCR_USERNAME`: GitHub username/org that owns image
+   - `GHCR_TOKEN`: GitHub token with `read:packages`
+
+After that, every push to `main` will:
+- test backend
+- build + push image to GHCR
+- SSH to VPS and run `docker compose -f docker-compose.prod.yml pull app && docker compose -f docker-compose.prod.yml up -d`
