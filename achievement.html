@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thanh tich - FlashLearn</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#4F46E5; --warning:#F59E0B; --bg:#F3F4F6; --text:#1F2937; --gray:#6B7280; --white:#fff; --radius:16px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); }
+    header { background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.05); padding:1rem 1.5rem; position:sticky; top:0; z-index:100; }
+    .header-inner { max-width:1200px; margin:auto; display:flex; justify-content:space-between; align-items:center; }
+    .logo { font-size:1.5rem; font-weight:800; color:var(--primary); text-decoration:none; display:flex; gap:8px; align-items:center; }
+    .nav-links { display:flex; gap:2rem; }
+    .nav-links a { color:var(--gray); text-decoration:none; font-weight:500; }
+    .nav-links a.active,.nav-links a:hover { color:var(--primary); }
+    .hero { background:linear-gradient(135deg,#F59E0B 0%,#D97706 100%); color:#fff; text-align:center; padding:2.7rem 1.2rem; }
+    .hero h1 { font-size:2.1rem; margin-bottom:.4rem; }
+    .container { max-width:1000px; margin:0 auto; padding:2rem 1.2rem; }
+    .summary { display:flex; gap:1rem; margin-top:-1.5rem; margin-bottom:1.5rem; }
+    .summary-item { flex:1; background:#fff; border-radius:12px; padding:1rem; text-align:center; box-shadow:0 8px 20px rgba(0,0,0,.08); }
+    .summary-item .num { font-size:1.7rem; font-weight:800; color:var(--primary); }
+    .summary-item .label { font-size:.8rem; color:var(--gray); }
+    .tabs { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; }
+    .tab { padding:.5rem 1rem; border:2px solid #E5E7EB; border-radius:999px; background:#fff; cursor:pointer; font-weight:600; font-size:.85rem; }
+    .tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .section-title { font-size:1.2rem; font-weight:700; margin:.8rem 0; display:flex; gap:8px; align-items:center; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; }
+    .card { background:#fff; border-radius:var(--radius); padding:1rem; border:1px solid #E5E7EB; display:flex; gap:.8rem; align-items:flex-start; }
+    .card.locked { opacity:.58; }
+    .icon { width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; background:#EEF2FF; color:var(--primary); }
+    .card.unlocked .icon { background:#FFFBEB; color:#D97706; }
+    .name { font-weight:700; margin-bottom:.2rem; }
+    .desc { font-size:.85rem; color:var(--gray); margin-bottom:.35rem; }
+    .reward { font-size:.84rem; color:#B45309; }
+    .progress { margin-top:.4rem; }
+    .bar { height:8px; border-radius:999px; background:#E5E7EB; overflow:hidden; }
+    .fill { height:100%; background:linear-gradient(90deg,#10B981,#34D399); }
+    .txt { font-size:.75rem; color:var(--gray); margin-top:3px; }
+    @media (max-width:768px){ .nav-links{display:none;} .summary{flex-direction:column;} }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a th:href="@{/}" href="/" class="logo"><i class="fa-solid fa-layer-group"></i> FlashLearn</a>
+    <div class="nav-links">
+      <a th:href="@{/library}" href="/library">Thu vien</a>
+      <a th:href="@{/mydeck}" href="/mydeck">Cua toi</a>
+      <a th:href="@{/leaderboard}" href="/leaderboard">Xep hang</a>
+      <a th:href="@{/profile}" href="/profile">Ho so</a>
+    </div>
+  </div>
+</header>
+<section class="hero"><h1><i class="fa-solid fa-trophy"></i> Thanh tich</h1><p>Theo doi tien trinh va mo khoa thanh tich cua ban</p></section>
+<div class="container">
+  <div class="summary">
+    <div class="summary-item"><div class="num" id="totalUnlocked">0</div><div class="label">Da mo khoa</div></div>
+    <div class="summary-item"><div class="num" id="totalAchievements">0</div><div class="label">Tong thanh tich</div></div>
+    <div class="summary-item"><div class="num" id="totalExpFromAchievement">0</div><div class="label">EXP tu thanh tich</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="filterCategory(this, 'all')">Tat ca</button>
+    <button class="tab" onclick="filterCategory(this, 'learning')">Hoc tap</button>
+    <button class="tab" onclick="filterCategory(this, 'creation')">Sang tao</button>
+    <button class="tab" onclick="filterCategory(this, 'streak')">Streak</button>
+    <button class="tab" onclick="filterCategory(this, 'social')">Cong dong</button>
+  </div>
+
+  <h3 class="section-title"><i class="fa-solid fa-unlock"></i> Da mo khoa</h3>
+  <div class="grid" id="unlockedGrid"></div>
+
+  <h3 class="section-title"><i class="fa-solid fa-lock"></i> Chua mo khoa</h3>
+  <div class="grid" id="lockedGrid"></div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+let achievements = [];
+let currentCategory = 'all';
+
+function token() { return localStorage.getItem('token'); }
+function headers() { return token() ? { 'Authorization': 'Bearer ' + token() } : {}; }
+
+function card(item) {
+  const unlocked = !!item.unlocked;
+  const progress = Math.max(0, Math.min(100, Number(item.progressPercent || 0)));
+  return `
+    <div class="card ${unlocked ? 'unlocked' : 'locked'}" data-category="${item.category}">
+      <div class="icon"><i class="fa-solid ${item.icon || 'fa-star'}"></i></div>
+      <div style="flex:1;">
+        <div class="name">${item.name || ''}</div>
+        <div class="desc">${item.description || ''}</div>
+        <div class="reward"><i class="fa-solid fa-star"></i> +${item.rewardExp || 0} EXP</div>
+        ${unlocked ? '' : `<div class='progress'><div class='bar'><div class='fill' style='width:${progress}%'></div></div><div class='txt'>${item.progressCurrent || 0}/${item.progressTarget || 0}</div></div>`}
+      </div>
+    </div>`;
+}
+
+function render() {
+  const filterFn = (item) => currentCategory === 'all' || item.category === currentCategory;
+  const unlocked = achievements.filter(item => item.unlocked).filter(filterFn);
+  const locked = achievements.filter(item => !item.unlocked).filter(filterFn);
+
+  document.getElementById('unlockedGrid').innerHTML = unlocked.length ? unlocked.map(card).join('') : '<p style="color:#6B7280;">Khong co thanh tich.</p>';
+  document.getElementById('lockedGrid').innerHTML = locked.length ? locked.map(card).join('') : '<p style="color:#6B7280;">Da mo khoa het.</p>';
+}
+
+function filterCategory(el, category) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentCategory = category;
+  render();
+}
+
+async function loadAchievements() {
+  if (!token()) {
+    window.location.href = '/login';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/achievements', { headers: headers() });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    achievements = Array.isArray(data.items) ? data.items : [];
+
+    const summary = data.summary || {};
+    document.getElementById('totalUnlocked').textContent = summary.totalUnlocked || 0;
+    document.getElementById('totalAchievements').textContent = summary.totalAchievements || 0;
+    document.getElementById('totalExpFromAchievement').textContent = summary.totalExpFromAchievement || 0;
+
+    render();
+  } catch {
+    document.getElementById('unlockedGrid').innerHTML = '<p style="color:#EF4444;">Khong tai duoc thanh tich.</p>';
+  }
+}
+
+loadAchievements();
+</script>
+</body>
+</html>
+
