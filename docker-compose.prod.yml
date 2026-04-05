@@ -22,7 +22,7 @@ services:
       start_period: 30s
 
   app:
-    image: ${APP_IMAGE:-ghcr.io/owner/flashlearn-backend:latest}
+    image: ${APP_IMAGE:-docker.io/owner/flashlearn-backend:latest}
     container_name: flashlearn-app
     restart: unless-stopped
     depends_on:
