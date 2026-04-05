@@ -50,6 +50,9 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
+
       - name: Build and test
         env:
           DB_URL: jdbc:mysql://localhost:3306/flashlearn_test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
