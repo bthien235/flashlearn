@@ -1,0 +1,11 @@
+# Default owner for all files
+* @bthien235
+
+# Backend ownership
+src/** @bthien235
+pom.xml @bthien235
+Dockerfile @bthien235
+docker-compose.yml @bthien235
+
+# Frontend ownership
+frontend/** @bthien235
