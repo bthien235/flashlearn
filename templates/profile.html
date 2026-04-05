@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ho so - FlashLearn</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --bg: #F3F4F6;
+      --text: #1F2937;
+      --gray: #6B7280;
+      --white: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: var(--white);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-weight: 500;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Profile Card */
+    .profile-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .profile-banner {
+      height: 120px;
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      position: relative;
+    }
+
+    .profile-info {
+      padding: 0 2rem 2rem;
+      position: relative;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #F59E0B, #D97706);
+      border: 4px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+      margin-top: -50px;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .profile-username {
+      color: var(--gray);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-joined {
+      color: var(--gray);
+      font-size: 0.85rem;
+    }
+
+    .profile-joined i { margin-right: 4px; }
+
+    .profile-actions {
+      position: absolute;
+      top: -30px;
+      right: 2rem;
+    }
+
+    .btn-edit-profile {
+      padding: 0.6rem 1.2rem;
+      background: white;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      color: var(--text);
+    }
+
+    .btn-edit-profile:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .stat-card .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.8rem;
+      font-size: 1.2rem;
+    }
+
+    .stat-card .stat-icon.exp { background: #FFFBEB; color: var(--warning); }
+    .stat-card .stat-icon.decks { background: #EEF2FF; color: var(--primary); }
+    .stat-card .stat-icon.cards { background: #F0FDF4; color: var(--success); }
+    .stat-card .stat-icon.streak { background: #FEF2F2; color: #EF4444; }
+
+    .stat-card .stat-num {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .stat-card .stat-text {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    /* EXP Progress */
+    .exp-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .exp-header h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .level-badge {
+      background: linear-gradient(135deg, var(--warning), #D97706);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .exp-bar-container {
+      margin-bottom: 0.5rem;
+    }
+
+    .exp-bar {
+      height: 12px;
+      background: #E5E7EB;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .exp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--warning), #FBBF24);
+      border-radius: 999px;
+      transition: width 1s ease;
+    }
+
+    .exp-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+
+    /* Recent Activity */
+    .activity-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .activity-section h3 {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .activity-icon.study { background: #EEF2FF; color: var(--primary); }
+    .activity-icon.create { background: #F0FDF4; color: var(--success); }
+    .activity-icon.achieve { background: #FFFBEB; color: var(--warning); }
+
+    .activity-info {
+      flex: 1;
+    }
+
+    .activity-info .title { font-weight: 600; font-size: 0.9rem; }
+    .activity-info .time { font-size: 0.8rem; color: var(--gray); }
+
+    .activity-exp {
+      font-weight: 700;
+      color: var(--warning);
+      font-size: 0.9rem;
+    }
+
+    /* Logout */
+    .logout-section {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .btn-logout {
+      padding: 0.7rem 2rem;
+      background: #FEF2F2;
+      color: #EF4444;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .btn-logout:hover { background: #FEE2E2; }
+
+    /* Edit Profile Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 480px;
+      margin: 1rem;
+      overflow: hidden;
+      animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover { background: rgba(255,255,255,0.3); }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .modal-body .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-body .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+
+    .modal-body .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .modal-body .form-group input:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-body .form-group .form-hint {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 0.8rem;
+      padding: 0 2rem 2rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .modal-btn-cancel {
+      background: #E5E7EB;
+      color: var(--text);
+    }
+
+    .modal-btn-cancel:hover { background: #D1D5DB; }
+
+    .modal-btn-save {
+      background: var(--primary);
+      color: white;
+    }
+
+    .modal-btn-save:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .modal-success {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      color: #16A34A;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .modal-success.show { display: flex; }
+
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 4px;
+    }
+
+    .toggle-pw:hover { color: var(--primary); }
+
+    .pw-error {
+      font-size: 0.8rem;
+      color: #EF4444;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .pw-error.show { display: block; }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .profile-actions { top: -25px; right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a th:href="@{/}" href="/" class="logo"><i class="fa-solid fa-layer-group"></i> FlashLearn</a>
+    <div class="nav-links">
+      <a th:href="@{/library}" href="/library">Thu vien</a>
+      <a th:href="@{/mydeck}" href="/mydeck">Cua toi</a>
+      <a th:href="@{/leaderboard}" href="/leaderboard">Xep hang</a>
+      <a th:href="@{/profile}" href="/profile" class="active">Ho so</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Profile Card -->
+  <div class="profile-card">
+    <div class="profile-banner"></div>
+    <div class="profile-info">
+      <div class="profile-avatar" id="profileAvatar">U</div>
+      <div class="profile-actions">
+        <button class="btn-edit-profile" onclick="openEditModal()"><i class="fa-solid fa-pen"></i> Chinh sua</button>
+      </div>
+      <h2 class="profile-name" id="profileName">Nguoi dung</h2>
+      <p class="profile-username" id="profileUsername">@username</p>
+      <p class="profile-joined" id="profileJoined"><i class="fa-solid fa-calendar"></i> Tham gia thang 01/2024</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon exp"><i class="fa-solid fa-star"></i></div>
+      <div class="stat-num" id="statExp">0</div>
+      <div class="stat-text">Tong EXP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon decks"><i class="fa-solid fa-layer-group"></i></div>
+      <div class="stat-num" id="statDecks">0</div>
+      <div class="stat-text">Bo the</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon cards"><i class="fa-solid fa-clone"></i></div>
+      <div class="stat-num" id="statCards">0</div>
+      <div class="stat-text">The da hoc</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon streak"><i class="fa-solid fa-fire"></i></div>
+      <div class="stat-num" id="statStreak">0</div>
+      <div class="stat-text">Ngay streak</div>
+    </div>
+  </div>
+
+  <!-- EXP Progress -->
+  <div class="exp-section">
+    <div class="exp-header">
+      <h3><i class="fa-solid fa-chart-line" style="color: var(--warning);"></i> Tien trinh Level</h3>
+      <span class="level-badge" id="levelBadge">Level 1</span>
+    </div>
+    <div class="exp-bar-container">
+      <div class="exp-bar">
+        <div class="exp-fill" id="expFill" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="exp-text">
+      <span id="expCurrent">0 EXP</span>
+      <span id="expNext">500 EXP de len Level 2</span>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="activity-section">
+    <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Hoat dong gan day</h3>
+    <div id="activityList"></div>
+  </div>
+
+  <!-- Quick Links -->
+  <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+    <a th:href="@{/achievement}" href="/achievement" style="flex:1; text-decoration:none;">
+      <div class="stat-card" style="cursor:pointer; transition: transform 0.2s;">
+        <div class="stat-icon achieve" style="background: #FFFBEB; color: #F59E0B;">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <div style="font-weight: 600; font-size: 0.9rem;">Xem thanh tich</div>
+      </div>
+    </a>
+    <a th:href="@{/leaderboard}" href="/leaderboard" style="flex:1; text-decoration:none;">
+      <div class="stat-card" style="cursor:pointer; transition: transform 0.2s;">
+        <div class="stat-icon" style="background: #EEF2FF; color: #4F46E5;">
+          <i class="fa-solid fa-ranking-star"></i>
+        </div>
+        <div style="font-weight: 600; font-size: 0.9rem;">Bang xep hang</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Logout -->
+  <div class="logout-section">
+    <button class="btn-logout" onclick="logout()">
+      <i class="fa-solid fa-right-from-bracket"></i> Dang xuat
+    </button>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-user-pen"></i> Chinh sua ho so</h3>
+      <button class="modal-close" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-success" id="editSuccess">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Cap nhat thanh cong!</span>
+      </div>
+
+      <div class="form-group">
+        <label>Ho va ten</label>
+        <input type="text" id="editFullname" placeholder="Nhap ho va ten">
+      </div>
+
+      <div class="form-group">
+        <label>Ten nguoi dung</label>
+        <input type="text" id="editUsername" placeholder="Nhap ten nguoi dung">
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="editEmail" placeholder="Nhap email">
+        <div class="form-hint">Email dung de dang nhap</div>
+      </div>
+
+      <div class="form-group">
+        <label>Mat khau cu</label>
+        <div style="position:relative;">
+          <input type="password" id="editOldPassword" placeholder="Nhap mat khau hien tai">
+          <button type="button" class="toggle-pw" onclick="togglePw('editOldPassword', this)"><i class="fa-solid fa-eye"></i></button>
+        </div>
+        <div class="form-hint">Bat buoc neu muon doi mat khau</div>
+      </div>
+
+      <div class="form-group">
+        <label>Mat khau moi</label>
+        <div style="position:relative;">
+          <input type="password" id="editNewPassword" placeholder="Nhap mat khau moi">
+          <button type="button" class="toggle-pw" onclick="togglePw('editNewPassword', this)"><i class="fa-solid fa-eye"></i></button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nhap lai mat khau moi</label>
+        <div style="position:relative;">
+          <input type="password" id="editConfirmPassword" placeholder="Nhap lai mat khau moi">
+          <button type="button" class="toggle-pw" onclick="togglePw('editConfirmPassword', this)"><i class="fa-solid fa-eye"></i></button>
+        </div>
+        <div class="pw-error" id="pwError"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">Huy</button>
+      <button class="modal-btn modal-btn-save" onclick="saveProfile()">
+        <i class="fa-solid fa-check"></i> Luu thay doi
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+let currentUser = null;
+
+function token() {
+    return localStorage.getItem('token');
+}
+
+function authHeaders() {
+    return { 'Authorization': 'Bearer ' + token() };
+}
+
+function renderProfile(user) {
+    const name = user.fullname || user.username || 'Nguoi dung';
+    const username = user.username || 'user';
+    const exp = user.exp || 0;
+    const level = user.level || (Math.floor(exp / 500) + 1);
+    const expInLevel = exp % 500;
+    const expPercent = (expInLevel / 500) * 100;
+
+    document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileUsername').textContent = '@' + username;
+
+    // Render joinedAt from API
+    if (user.joinedAt) {
+        const parts = user.joinedAt.split('-');
+        if (parts.length >= 2) {
+            document.getElementById('profileJoined').innerHTML =
+                '<i class="fa-solid fa-calendar"></i> Tham gia thang ' + parts[1] + '/' + parts[0];
+        }
+    }
+
+    document.getElementById('statExp').textContent = exp.toLocaleString();
+    document.getElementById('statDecks').textContent = user.deckCount || 0;
+    document.getElementById('statCards').textContent = user.cardCount || 0;
+    document.getElementById('statStreak').textContent = user.streak || 0;
+    document.getElementById('levelBadge').textContent = 'Level ' + level;
+    document.getElementById('expCurrent').textContent = expInLevel + ' EXP';
+    document.getElementById('expNext').textContent = (500 - expInLevel) + ' EXP de len Level ' + (level + 1);
+    setTimeout(() => {
+        document.getElementById('expFill').style.width = expPercent + '%';
+    }, 300);
+}
+
+function iconClass(type) {
+    if (type === 'creation') return 'create';
+    if (type === 'achievement') return 'achieve';
+    return 'study';
+}
+
+function iconTag(type) {
+    if (type === 'creation') return 'fa-plus';
+    if (type === 'achievement') return 'fa-trophy';
+    if (type === 'profile') return 'fa-user-pen';
+    if (type === 'delete') return 'fa-trash';
+    if (type === 'library') return 'fa-bookmark';
+    return 'fa-book-open';
+}
+
+function renderActivities(items) {
+    const list = document.getElementById('activityList');
+    if (!Array.isArray(items) || items.length === 0) {
+        list.innerHTML = '<p style="color: var(--gray);">Chua co hoat dong nao.</p>';
+        return;
+    }
+
+    list.innerHTML = items.map(item => `
+      <div class="activity-item">
+        <div class="activity-icon ${iconClass(item.type)}"><i class="fa-solid ${iconTag(item.type)}"></i></div>
+        <div class="activity-info">
+          <div class="title">${item.title || ''}</div>
+          <div class="time">${item.time || ''}</div>
+        </div>
+        <span class="activity-exp">${(item.exp || 0) > 0 ? '+' + item.exp + ' EXP' : ''}</span>
+      </div>
+    `).join('');
+}
+
+async function loadProfile() {
+    if (!token()) {
+        window.location.href = '/login';
+        return;
+    }
+
+    try {
+        const [meRes, actRes] = await Promise.all([
+            fetch(API_BASE + '/users/me', { headers: authHeaders() }),
+            fetch(API_BASE + '/users/me/activities', { headers: authHeaders() })
+        ]);
+
+        if (!meRes.ok) {
+            throw new Error('profile-failed');
+        }
+
+        currentUser = await meRes.json();
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        renderProfile(currentUser);
+
+        const activities = actRes.ok ? await actRes.json() : [];
+        renderActivities(activities);
+    } catch (e) {
+        if (window.AuthStore) {
+            window.AuthStore.clear();
+        } else {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+        }
+        window.location.href = '/login';
+    }
+}
+
+function logout() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    fetch(API_BASE + '/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refreshToken || '' })
+    }).catch(() => {});
+    if (window.AuthStore) {
+        window.AuthStore.clear();
+    } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+    }
+    window.location.href = '/login';
+}
+
+function openEditModal() {
+    const user = currentUser || JSON.parse(localStorage.getItem('user') || '{}');
+    document.getElementById('editFullname').value = user.fullname || '';
+    document.getElementById('editUsername').value = user.username || '';
+    document.getElementById('editEmail').value = user.email || '';
+    document.getElementById('editOldPassword').value = '';
+    document.getElementById('editNewPassword').value = '';
+    document.getElementById('editConfirmPassword').value = '';
+    document.getElementById('editSuccess').classList.remove('show');
+    document.getElementById('pwError').classList.remove('show');
+    document.getElementById('editModal').classList.add('show');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('show');
+}
+
+async function saveProfile() {
+    const fullname = document.getElementById('editFullname').value.trim();
+    const username = document.getElementById('editUsername').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const oldPw = document.getElementById('editOldPassword').value;
+    const newPw = document.getElementById('editNewPassword').value;
+    const confirmPw = document.getElementById('editConfirmPassword').value;
+    const pwError = document.getElementById('pwError');
+
+    pwError.classList.remove('show');
+
+    if (!fullname || !username || !email) {
+        alert('Vui long dien day du ho ten, ten nguoi dung va email!');
+        return;
+    }
+
+    // Password validation
+    if (oldPw || newPw || confirmPw) {
+        if (!oldPw) {
+            pwError.textContent = 'Vui long nhap mat khau cu!';
+            pwError.classList.add('show');
+            document.getElementById('editOldPassword').focus();
+            return;
+        }
+        if (!newPw) {
+            pwError.textContent = 'Vui long nhap mat khau moi!';
+            pwError.classList.add('show');
+            document.getElementById('editNewPassword').focus();
+            return;
+        }
+        if (newPw.length < 6) {
+            pwError.textContent = 'Mat khau moi phai co it nhat 6 ky tu!';
+            pwError.classList.add('show');
+            document.getElementById('editNewPassword').focus();
+            return;
+        }
+        if (newPw !== confirmPw) {
+            pwError.textContent = 'Mat khau moi khong khop! Vui long nhap lai.';
+            pwError.classList.add('show');
+            document.getElementById('editConfirmPassword').focus();
+            return;
+        }
+        if (oldPw === newPw) {
+            pwError.textContent = 'Mat khau moi phai khac mat khau cu!';
+            pwError.classList.add('show');
+            document.getElementById('editNewPassword').focus();
+            return;
+        }
+    }
+
+    try {
+        const res = await fetch(API_BASE + '/users/me', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders()
+            },
+            body: JSON.stringify({
+                fullname,
+                username,
+                email,
+                oldPassword: oldPw,
+                newPassword: newPw
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            pwError.textContent = err.message || 'Cap nhat that bai!';
+            pwError.classList.add('show');
+            return;
+        }
+
+        currentUser = await res.json();
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        document.getElementById('editSuccess').classList.add('show');
+        renderProfile(currentUser);
+        setTimeout(() => {
+            closeEditModal();
+            loadProfile();
+        }, 900);
+    } catch (e) {
+        pwError.textContent = 'Khong ket noi duoc server!';
+        pwError.classList.add('show');
+    }
+}
+
+function togglePw(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Close modal when click outside
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+});
+
+loadProfile();
+</script>
+
+</body>
+</html>
+
+
+
