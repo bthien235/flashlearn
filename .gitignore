@@ -47,4 +47,4 @@ docker-compose.override.yml
 gha_vps_key
 gha_vps_key.pub
 
-
+docs/
