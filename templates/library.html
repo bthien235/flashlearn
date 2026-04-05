@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thu vien Flashcards - FlashLearn</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-color:#4F46E5; --primary-hover:#4338ca; --bg-color:#F3F4F6; --text-dark:#1F2937; --text-gray:#6B7280; --white:#fff; --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 4px 6px rgba(0,0,0,.1); --radius:12px; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg-color); color:var(--text-dark); }
+        a { text-decoration:none; color:inherit; }
+        header { background:var(--white); box-shadow:var(--shadow-sm); position:sticky; top:0; z-index:100; }
+        .navbar { max-width:1200px; margin:0 auto; padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-size:1.5rem; font-weight:800; color:var(--primary-color); display:flex; gap:8px; align-items:center; }
+        .nav-links { display:flex; gap:2rem; align-items:center; }
+        .nav-links a { font-weight:500; color:var(--text-gray); }
+        .nav-links a.active,.nav-links a:hover { color:var(--primary-color); }
+        .btn-login { padding:.5rem 1.25rem; background:var(--primary-color); color:#fff; border-radius:8px; font-weight:600; }
+        .hero { background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%); color:#fff; text-align:center; padding:4rem 1.5rem; }
+        .hero h1 { font-size:2.5rem; margin-bottom:1rem; }
+        .search-container { max-width:600px; margin:1.5rem auto 0; position:relative; }
+        .search-container input { width:100%; padding:1rem 1.5rem 1rem 3rem; border:none; border-radius:999px; outline:none; }
+        .search-container i { position:absolute; left:1.1rem; top:50%; transform:translateY(-50%); color:#9CA3AF; }
+        .container { max-width:1200px; margin:0 auto; padding:3rem 1.5rem; }
+        .category-section { margin-bottom:2.5rem; }
+        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+        .section-title { font-size:1.4rem; font-weight:700; display:flex; align-items:center; gap:10px; }
+        .view-all { font-size:.9rem; color:var(--primary-color); font-weight:600; cursor:pointer; }
+        .card-grid,.extra-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; }
+        .extra-cards { margin-top:1rem; display:none; }
+        .extra-cards.show { display:grid; }
+        .deck-card { background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); border:1px solid #E5E7EB; }
+        .card-header { color:#fff; padding:1rem; font-weight:600; display:flex; align-items:center; gap:.5rem; }
+        .bg-it { background:linear-gradient(135deg,#3B82F6,#2563EB); }
+        .bg-toeic { background:linear-gradient(135deg,#F59E0B,#D97706); }
+        .bg-daily { background:linear-gradient(135deg,#10B981,#059669); }
+        .bg-other { background:linear-gradient(135deg,#6366F1,#4338CA); }
+        .card-body { padding:1.1rem; }
+        .deck-title { font-size:1.05rem; font-weight:700; margin-bottom:.45rem; }
+        .deck-meta { display:flex; justify-content:space-between; font-size:.86rem; color:var(--text-gray); margin-bottom:.75rem; }
+        .tag { background:#EEF2FF; color:#4338CA; padding:.2rem .6rem; border-radius:999px; font-size:.75rem; }
+        .tag.intermediate { background:#FEF3C7; color:#B45309; }
+        .tag.hard { background:#FEE2E2; color:#B91C1C; }
+        .btn-row { display:flex; gap:.5rem; }
+        .btn-start { flex:1; border:none; color:#fff; background:var(--primary-color); border-radius:8px; padding:.6rem .8rem; font-weight:600; cursor:pointer; }
+        .btn-save { border:none; color:#fff; border-radius:8px; padding:.6rem .8rem; font-weight:600; cursor:pointer; }
+        .user-avatar { width:36px; height:36px; border-radius:50%; background:var(--primary-color); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+        .user-dropdown { position:relative; }
+        .dropdown-menu { position:absolute; top:100%; right:0; min-width:180px; background:#fff; border-radius:10px; box-shadow:var(--shadow-md); padding:.5rem 0; display:none; }
+        .dropdown-menu.show { display:block; }
+        .dropdown-menu a { display:flex; gap:10px; align-items:center; padding:.6rem 1rem; font-size:.9rem; }
+        .dropdown-menu a.danger { color:#EF4444; }
+        footer { text-align:center; padding:1.5rem; color:var(--text-gray); }
+        @media (max-width:768px){ .nav-links{display:none;} .hero h1{font-size:1.8rem;} }
+    </style>
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <a th:href="@{/}" href="/" class="logo"><i class="fa-solid fa-layer-group"></i> FlashLearn</a>
+        <div class="nav-links">
+            <a th:href="@{/}" href="/">Trang chu</a>
+            <a th:href="@{/library}" href="/library" class="active">Thu vien</a>
+            <a th:href="@{/mydeck}" href="/mydeck">Cua toi</a>
+            <a th:href="@{/leaderboard}" href="/leaderboard">Xep hang</a>
+            <span id="authArea"></span>
+        </div>
+    </nav>
+</header>
+<section class="hero">
+    <h1>Kham pha kho tang kien thuc</h1>
+    <p>Tim kiem va hoc cac bo the tu cong dong.</p>
+    <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Tim bo the..." oninput="handleSearch()">
+    </div>
+</section>
+<main class="container" id="librarySections"></main>
+<footer>&copy; 2026 FlashLearn.</footer>
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+let allDecks = [];
+let query = '';
+
+function token() { return localStorage.getItem('token'); }
+function headers() { return token() ? { 'Authorization': 'Bearer ' + token() } : {}; }
+
+function catMeta(category) {
+  const cat = (category || '').toUpperCase();
+  if (cat.includes('TOEIC')) return { key:'TOEIC', title:'Luyen thi TOEIC', icon:'fa-chart-line', header:'bg-toeic' };
+  if (cat.includes('DAILY')) return { key:'DAILY', title:'Daily Life & Giao tiep', icon:'fa-mug-hot', header:'bg-daily' };
+  if (cat.includes('IT')) return { key:'IT', title:'Tieng Anh CNTT (IT)', icon:'fa-laptop-code', header:'bg-it' };
+  return { key:'OTHER', title:'Chu de khac', icon:'fa-folder-open', header:'bg-other' };
+}
+
+function diffTag(difficulty) {
+  const d = (difficulty || '').toUpperCase();
+  if (d === 'HARD') return { text:'Nang cao', cls:'hard' };
+  if (d === 'MEDIUM') return { text:'Trung binh', cls:'intermediate' };
+  return { text:'Co ban', cls:'' };
+}
+
+function deckIcon(category) {
+  const c = (category || '').toUpperCase();
+  if (c.includes('TOEIC')) return 'fa-briefcase';
+  if (c.includes('DAILY')) return 'fa-comments';
+  return 'fa-code';
+}
+
+function cardHtml(deck, headerClass) {
+  const tag = diffTag(deck.difficulty);
+  const saveText = deck.saved ? 'Bo luu' : 'Luu';
+  const saveColor = deck.saved ? '#EF4444' : '#10B981';
+  return `
+  <div class="deck-card" onclick="startStudy(${deck.id})">
+    <div class="card-header ${headerClass}"><i class="fa-solid ${deckIcon(deck.category)}"></i><span>${deck.category || 'Topic'}</span></div>
+    <div class="card-body">
+      <h3 class="deck-title">${deck.name || 'Untitled deck'}</h3>
+      <div class="deck-meta"><span><i class="fa-solid fa-clone"></i> ${deck.cardCount || 0} the</span><span class="tag ${tag.cls}">${tag.text}</span></div>
+      <p style="font-size:.9rem;color:#666;margin-bottom:1rem;">${deck.description || 'Bo flashcard tu thu vien.'}</p>
+      <div class="btn-row">
+        <button class="btn-start" onclick="event.stopPropagation(); startStudy(${deck.id})">Hoc ngay</button>
+        <button class="btn-save" style="background:${saveColor}" onclick="event.stopPropagation(); toggleSave(${deck.id}, ${deck.saved})">${saveText}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const groups = {};
+  const filtered = query ? allDecks.filter(d => `${d.name||''} ${d.description||''} ${d.category||''}`.toLowerCase().includes(query)) : allDecks;
+
+  filtered.forEach(deck => {
+    const meta = catMeta(deck.category);
+    if (!groups[meta.key]) groups[meta.key] = { meta, decks: [] };
+    groups[meta.key].decks.push(deck);
+  });
+
+  const order = ['IT', 'TOEIC', 'DAILY', 'OTHER'];
+  let html = '';
+
+  order.forEach(key => {
+    const group = groups[key];
+    if (!group) return;
+    const primary = group.decks.slice(0, 3);
+    const extra = group.decks.slice(3);
+    const extraId = `${group.meta.key.toLowerCase()}-extra`;
+
+    html += `
+    <section class="category-section">
+      <div class="section-header">
+        <h2 class="section-title"><i class="fa-solid ${group.meta.icon}"></i>${group.meta.title}</h2>
+        ${extra.length ? `<a class="view-all" onclick="toggleExtra('${extraId}', this)">Xem tat ca <i class='fa-solid fa-arrow-right'></i></a>` : ''}
+      </div>
+      <div class="card-grid">${primary.map(d => cardHtml(d, group.meta.header)).join('')}</div>
+      ${extra.length ? `<div class='extra-cards' id='${extraId}'>${extra.map(d => cardHtml(d, group.meta.header)).join('')}</div>` : ''}
+    </section>`;
+  });
+
+  if (!html) html = '<p style="text-align:center;color:#6B7280;">Khong co du lieu phu hop.</p>';
+  document.getElementById('librarySections').innerHTML = html;
+}
+
+async function loadDecks() {
+  try {
+    const res = await fetch(API_BASE + '/library/decks', { headers: headers() });
+    const data = await res.json();
+    allDecks = Array.isArray(data) ? data : [];
+    render();
+  } catch {
+    document.getElementById('librarySections').innerHTML = '<p style="color:#EF4444;">Khong the tai thu vien.</p>';
+  }
+}
+
+function toggleExtra(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('show');
+  btn.innerHTML = el.classList.contains('show') ? 'Thu gon <i class="fa-solid fa-chevron-up"></i>' : 'Xem tat ca <i class="fa-solid fa-arrow-right"></i>';
+}
+
+function handleSearch() {
+  query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  render();
+}
+
+function startStudy(deckId) {
+  if (!token()) { window.location.href = '/login'; return; }
+  window.location.href = '/study?deckId=' + deckId;
+}
+
+async function toggleSave(deckId, saved) {
+  if (!token()) { window.location.href = '/login'; return; }
+  const method = saved ? 'DELETE' : 'POST';
+  try {
+    const res = await fetch(API_BASE + '/library/decks/' + deckId + '/save', { method, headers: headers() });
+    if (!res.ok) throw new Error();
+    await loadDecks();
+  } catch {
+    alert('Khong the cap nhat luu bo the.');
+  }
+}
+
+function toggleDropdown() {
+  const menu = document.getElementById('dropdownMenu');
+  if (menu) menu.classList.toggle('show');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.user-dropdown')) {
+    const menu = document.getElementById('dropdownMenu');
+    if (menu) menu.classList.remove('show');
+  }
+});
+
+async function renderAuth() {
+  const authArea = document.getElementById('authArea');
+  if (!token()) {
+    authArea.innerHTML = '<a th:href="@{/login}" href="/login" class="btn-login">Dang nhap</a>';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/users/me', { headers: headers() });
+    if (!res.ok) throw new Error();
+    const user = await res.json();
+    localStorage.setItem('user', JSON.stringify(user));
+    const initial = (user.fullname || user.username || 'U').charAt(0).toUpperCase();
+    authArea.innerHTML = `
+      <div class="user-dropdown">
+        <div class="user-avatar" onclick="toggleDropdown()">${initial}</div>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a th:href="@{/profile}" href="/profile"><i class="fa-solid fa-user"></i> Ho so</a>
+          <a th:href="@{/mydeck}" href="/mydeck"><i class="fa-solid fa-folder"></i> Cua toi</a>
+          <a th:href="@{/achievement}" href="/achievement"><i class="fa-solid fa-trophy"></i> Thanh tich</a>
+          <a href="#" class="danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Dang xuat</a>
+        </div>
+      </div>`;
+  } catch {
+    authArea.innerHTML = '<a th:href="@{/login}" href="/login" class="btn-login">Dang nhap</a>';
+  }
+}
+
+function logout() {
+  const refreshToken = localStorage.getItem('refreshToken');
+  fetch(API_BASE + '/auth/logout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken: refreshToken || '' })
+  }).catch(() => {});
+  if (window.AuthStore) {
+    window.AuthStore.clear();
+  } else {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+  }
+  window.location.href = '/login';
+}
+
+(async function init() {
+  await renderAuth();
+  await loadDecks();
+})();
+</script>
+</body>
+</html>
+

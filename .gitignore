@@ -43,6 +43,4 @@ docker-compose.override.yml
 ### Claude ###
 .claude/
 
-### Local templates ###
-template/
-src/main/resources/templates/
+
