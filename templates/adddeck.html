@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tao bo the moi - FlashLearn</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --success: #10B981;
+      --bg: #F3F4F6;
+      --text: #1F2937;
+      --gray: #6B7280;
+      --white: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Header */
+    header {
+      background: var(--white);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .back-btn:hover { color: var(--primary); }
+
+    /* Page */
+    .container {
+      max-width: 700px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .page-header p {
+      color: var(--gray);
+    }
+
+    /* Form Card */
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .form-group label span {
+      color: #EF4444;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.3s;
+      outline: none;
+      background: white;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-hint {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    /* Category chips */
+    .category-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .chip {
+      padding: 0.5rem 1rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      font-family: inherit;
+    }
+
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+
+    .chip.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Difficulty */
+    .difficulty-options {
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    .diff-option {
+      flex: 1;
+      padding: 0.7rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      background: white;
+      font-family: inherit;
+    }
+
+    .diff-option:hover { border-color: var(--primary); }
+
+    .diff-option.selected.easy { border-color: var(--success); background: #F0FDF4; color: #16A34A; }
+    .diff-option.selected.medium { border-color: #F59E0B; background: #FFFBEB; color: #B45309; }
+    .diff-option.selected.hard { border-color: #EF4444; background: #FEF2F2; color: #DC2626; }
+
+    .visibility-option {
+      flex: 1;
+      padding: 0.7rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      background: white;
+      font-family: inherit;
+    }
+
+    .visibility-option:hover { border-color: var(--primary); }
+    .visibility-option.selected.easy { border-color: var(--success); background: #F0FDF4; color: #16A34A; }
+    .visibility-option.selected.medium { border-color: #F59E0B; background: #FFFBEB; color: #B45309; }
+
+    /* Preview */
+    .preview-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #E5E7EB;
+    }
+
+    .preview-section h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--gray);
+    }
+
+    .preview-card {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      border-radius: 12px;
+      padding: 2rem;
+      color: white;
+      text-align: center;
+    }
+
+    .preview-card .preview-icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.9; }
+    .preview-card h4 { font-size: 1.2rem; margin-bottom: 0.3rem; }
+    .preview-card p { font-size: 0.85rem; opacity: 0.8; }
+
+    /* Submit */
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #E5E7EB;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover { background: #D1D5DB; }
+
+    /* Success */
+    .success-message {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      color: #16A34A;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .success-message.show { display: flex; }
+
+    @media (max-width: 768px) {
+      .difficulty-options { flex-direction: column; }
+      .form-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a th:href="@{/}" href="/" class="logo"><i class="fa-solid fa-layer-group"></i> FlashLearn</a>
+    <a th:href="@{/mydeck}" href="/mydeck" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Quay lai</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h1><i class="fa-solid fa-plus-circle" style="color: var(--primary);"></i> Tao bo the moi</h1>
+    <p>Tao bo flashcard cua rieng ban</p>
+  </div>
+
+  <div class="success-message" id="successMsg">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>Tao bo the thanh cong! Dang chuyen huong...</span>
+  </div>
+
+  <div class="form-card">
+    <form id="deckForm" onsubmit="handleCreateDeck(event)">
+      <div class="form-group">
+        <label>Ten bo the <span>*</span></label>
+        <input type="text" id="deckName" placeholder="VD: Tu vung TOEIC Part 5" required>
+      </div>
+
+      <div class="form-group">
+        <label>Mo ta</label>
+        <textarea id="deckDesc" placeholder="Mo ta ngan ve bo the cua ban..."></textarea>
+        <div class="form-hint">Toi da 200 ky tu</div>
+      </div>
+
+      <div class="form-group">
+        <label>Danh muc <span>*</span></label>
+        <div class="category-chips">
+          <button type="button" class="chip" onclick="selectCategory(this, 'IT')">
+            <i class="fa-solid fa-laptop-code"></i> Tieng Anh IT
+          </button>
+          <button type="button" class="chip" onclick="selectCategory(this, 'TOEIC')">
+            <i class="fa-solid fa-chart-line"></i> TOEIC
+          </button>
+          <button type="button" class="chip" onclick="selectCategory(this, 'DAILY')">
+            <i class="fa-solid fa-mug-hot"></i> Giao tiep
+          </button>
+          <button type="button" class="chip" onclick="selectCategory(this, 'OTHER')">
+            <i class="fa-solid fa-ellipsis"></i> Khac
+          </button>
+        </div>
+        <!-- Custom category input - shows when OTHER is selected -->
+        <div id="customCategoryBox" style="display:none; margin-top: 0.8rem;">
+          <input type="text" id="customCategoryInput" placeholder="Nhap ten danh muc cua ban..." style="width:100%; padding:0.8rem 1rem; border:2px solid #E5E7EB; border-radius:10px; font-size:0.95rem; font-family:inherit; outline:none; transition: border-color 0.3s;">
+          <div class="form-hint">VD: Y hoc, Kinh te, Du lich...</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Do kho</label>
+        <div class="difficulty-options">
+          <button type="button" class="diff-option easy" onclick="selectDifficulty(this, 'EASY')">
+            <i class="fa-solid fa-seedling"></i> Co ban
+          </button>
+          <button type="button" class="diff-option medium" onclick="selectDifficulty(this, 'MEDIUM')">
+            <i class="fa-solid fa-fire"></i> Trung binh
+          </button>
+          <button type="button" class="diff-option hard" onclick="selectDifficulty(this, 'HARD')">
+            <i class="fa-solid fa-bolt"></i> Nang cao
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Che do chia se</label>
+        <div class="difficulty-options">
+          <button type="button" class="visibility-option selected easy" onclick="selectVisibility(this, 'PRIVATE')">
+            <i class="fa-solid fa-lock"></i> Rieng tu
+          </button>
+          <button type="button" class="visibility-option medium" onclick="selectVisibility(this, 'PUBLIC')">
+            <i class="fa-solid fa-earth-asia"></i> Cong khai
+          </button>
+        </div>
+        <div class="form-hint">Cong khai: hien tren Library. Rieng tu: chi minh ban thay.</div>
+      </div>
+
+      <div class="preview-section">
+        <h3><i class="fa-solid fa-eye"></i> Xem truoc</h3>
+        <div class="preview-card">
+          <div class="preview-icon"><i class="fa-solid fa-layer-group"></i></div>
+          <h4 id="previewTitle">Ten bo the</h4>
+          <p id="previewDesc">Mo ta bo the</p>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/mydeck'">Huy</button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-check"></i> Tao bo the
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+let selectedCategory = '';
+let selectedDifficulty = 'EASY';
+let selectedVisibility = 'PRIVATE';
+
+function selectCategory(el, cat) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCategory = cat;
+
+    const customBox = document.getElementById('customCategoryBox');
+    const customInput = document.getElementById('customCategoryInput');
+
+    if (cat === 'OTHER') {
+        customBox.style.display = 'block';
+        customInput.focus();
+    } else {
+        customBox.style.display = 'none';
+        customInput.value = '';
+    }
+}
+
+function selectDifficulty(el, diff) {
+    document.querySelectorAll('.diff-option').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedDifficulty = diff;
+}
+
+function selectVisibility(el, visibility) {
+    document.querySelectorAll('.visibility-option').forEach(v => v.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedVisibility = visibility;
+}
+
+// Custom category input focus style
+document.getElementById('customCategoryInput').addEventListener('focus', function() {
+    this.style.borderColor = '#4F46E5';
+});
+document.getElementById('customCategoryInput').addEventListener('blur', function() {
+    this.style.borderColor = '#E5E7EB';
+});
+
+// Live preview
+document.getElementById('deckName').addEventListener('input', function() {
+    document.getElementById('previewTitle').textContent = this.value || 'Ten bo the';
+});
+
+document.getElementById('deckDesc').addEventListener('input', function() {
+    document.getElementById('previewDesc').textContent = this.value || 'Mo ta bo the';
+});
+
+async function handleCreateDeck(e) {
+    e.preventDefault();
+    const name = document.getElementById('deckName').value;
+    const description = document.getElementById('deckDesc').value;
+
+    if (!selectedCategory) {
+        alert('Vui long chon danh muc!');
+        return;
+    }
+
+    let finalCategory = selectedCategory;
+    if (selectedCategory === 'OTHER') {
+        const customCat = document.getElementById('customCategoryInput').value.trim();
+        if (!customCat) {
+            alert('Vui long nhap ten danh muc!');
+            document.getElementById('customCategoryInput').focus();
+            return;
+        }
+        finalCategory = customCat;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+
+    try {
+        const res = await fetch(API_BASE + '/decks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                name,
+                description,
+                category: finalCategory,
+                difficulty: selectedDifficulty,
+                visibility: selectedVisibility
+            })
+        });
+
+        if (res.ok) {
+            const deck = await res.json();
+            document.getElementById('successMsg').classList.add('show');
+            setTimeout(() => {
+                window.location.href = '/addflashcard?deckId=' + (deck.id || '');
+            }, 1500);
+        } else {
+            alert('Tao bo the that bai! Vui long thu lai.');
+        }
+    } catch (error) {
+        alert('Khong the ket noi den server!');
+    }
+}
+
+// Check auth
+if (!localStorage.getItem('token')) {
+    window.location.href = '/login';
+}
+</script>
+
+</body>
+</html>
+
+
+

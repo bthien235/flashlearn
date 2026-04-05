@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ket qua hoc - FlashLearn</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --success: #10B981;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --bg: #F3F4F6;
+      --text: #1F2937;
+      --gray: #6B7280;
+      --white: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.1);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    header {
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-weight: 500;
+      color: var(--gray);
+    }
+
+    .nav-links a.active,
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .btn-login {
+      padding: .5rem 1.25rem;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .user-dropdown { position: relative; }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      min-width: 180px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: var(--shadow-md);
+      padding: .5rem 0;
+      display: none;
+    }
+    .dropdown-menu.show { display: block; }
+    .dropdown-menu a {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: .6rem 1rem;
+      font-size: .9rem;
+      color: var(--text);
+    }
+    .dropdown-menu a.danger { color: var(--danger); }
+
+    .result-main {
+      padding: 2.25rem 1rem;
+    }
+
+    .result-page {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 0 0 1rem;
+    }
+
+    /* Trophy animation */
+    .trophy-section {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .trophy-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #F59E0B, #D97706);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      animation: bounceIn 0.8s ease;
+    }
+
+    .trophy-icon i {
+      font-size: 2.5rem;
+      color: white;
+    }
+
+    .trophy-section h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .trophy-section p {
+      color: var(--gray);
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* EXP Card */
+    .exp-card {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      color: white;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .exp-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .exp-label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .exp-value {
+      font-size: 3.5rem;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
+    }
+
+    .exp-value span {
+      font-size: 1.5rem;
+      opacity: 0.8;
+    }
+
+    .exp-detail {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.2rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .stat-card .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-size: 1rem;
+    }
+
+    .stat-card .stat-icon.total { background: #EFF6FF; color: #3B82F6; }
+    .stat-card .stat-icon.correct { background: #F0FDF4; color: var(--success); }
+    .stat-card .stat-icon.wrong { background: #FEF2F2; color: var(--danger); }
+
+    .stat-card .stat-num {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-card .stat-text {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+
+    /* Accuracy bar */
+    .accuracy-section {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .accuracy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+
+    .accuracy-header span {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .accuracy-percent {
+      font-weight: 700;
+      color: var(--success);
+      font-size: 1.1rem;
+    }
+
+    .accuracy-bar {
+      height: 10px;
+      background: #E5E7EB;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .accuracy-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 1s ease;
+      background: linear-gradient(90deg, var(--success), #34D399);
+    }
+
+    .accuracy-fill.medium { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .accuracy-fill.low { background: linear-gradient(90deg, #EF4444, #F87171); }
+
+    /* Streak */
+    .streak-badge {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .streak-icon {
+      width: 48px;
+      height: 48px;
+      background: #FFFBEB;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .streak-info h4 { font-size: 0.95rem; }
+    .streak-info p { font-size: 0.8rem; color: var(--gray); }
+
+    /* Actions */
+    .result-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .btn {
+      padding: 0.85rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      text-decoration: none;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--text);
+      border: 2px solid #E5E7EB;
+    }
+
+    .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--gray);
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .exp-value { font-size: 2.5rem; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <nav class="navbar">
+    <a th:href="@{/}" href="/" class="logo"><i class="fa-solid fa-layer-group"></i> FlashLearn</a>
+    <div class="nav-links">
+      <a th:href="@{/}" href="/">Trang chu</a>
+      <a th:href="@{/library}" href="/library">Thu vien</a>
+      <a th:href="@{/mydeck}" href="/mydeck">Cua toi</a>
+      <a th:href="@{/leaderboard}" href="/leaderboard">Xep hang</a>
+      <span id="authArea"></span>
+    </div>
+  </nav>
+</header>
+
+<main class="result-main">
+<div class="result-page">
+  <div class="trophy-section">
+    <div class="trophy-icon">
+      <i class="fa-solid fa-trophy"></i>
+    </div>
+    <h1 id="resultTitle">Xuat sac!</h1>
+    <p id="resultSubtitle">Ban da hoan thanh phien hoc</p>
+  </div>
+
+  <!-- EXP Gained -->
+  <div class="exp-card">
+    <div class="exp-label">EXP Nhan duoc</div>
+    <div class="exp-value">+<span id="expAmount">0</span> <span>EXP</span></div>
+    <div class="exp-detail" id="expDetail">10 EXP x 0 the dung</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon total"><i class="fa-solid fa-layer-group"></i></div>
+      <div class="stat-num" id="totalCards">0</div>
+      <div class="stat-text">Tong so the</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon correct"><i class="fa-solid fa-check"></i></div>
+      <div class="stat-num" id="correctCards">0</div>
+      <div class="stat-text">Da nho</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon wrong"><i class="fa-solid fa-xmark"></i></div>
+      <div class="stat-num" id="wrongCards">0</div>
+      <div class="stat-text">Chua nho</div>
+    </div>
+  </div>
+
+  <!-- Accuracy -->
+  <div class="accuracy-section">
+    <div class="accuracy-header">
+      <span><i class="fa-solid fa-bullseye"></i> Do chinh xac</span>
+      <span class="accuracy-percent" id="accuracyText">0%</span>
+    </div>
+    <div class="accuracy-bar">
+      <div class="accuracy-fill" id="accuracyFill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- Streak -->
+  <div class="streak-badge">
+    <div class="streak-icon">
+      <i class="fa-solid fa-fire" style="color: #F59E0B;"></i>
+    </div>
+    <div class="streak-info">
+      <h4 id="streakText">Chuoi hoc tap!</h4>
+      <p>Tiep tuc hoc moi ngay de tang streak</p>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="result-actions">
+    <a href="#" class="btn btn-primary" id="btnRelearn">
+      <i class="fa-solid fa-rotate-left"></i> Hoc lai nhung the sai
+    </a>
+    <a th:href="@{/library}" href="/library" class="btn btn-secondary">
+      <i class="fa-solid fa-book-open"></i> Chon bo the khac
+    </a>
+    <a th:href="@{/mydeck}" href="/mydeck" class="btn btn-secondary">
+      <i class="fa-solid fa-home"></i> Ve trang cua toi
+    </a>
+    <a th:href="@{/leaderboard}" href="/leaderboard" class="btn btn-success">
+      <i class="fa-solid fa-ranking-star"></i> Xem bang xep hang
+    </a>
+  </div>
+</div>
+</main>
+
+<footer>&copy; 2026 FlashLearn.</footer>
+
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+function token() { return localStorage.getItem('token'); }
+function headers() { return token() ? { 'Authorization': 'Bearer ' + token() } : {}; }
+
+function renderResult(result) {
+    const total = result.totalCards || 0;
+    const correct = result.correct || 0;
+    const wrong = result.wrong || 0;
+    const exp = result.expGained || 0;
+    const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+    document.getElementById('totalCards').textContent = total;
+    document.getElementById('correctCards').textContent = correct;
+    document.getElementById('wrongCards').textContent = wrong;
+    document.getElementById('expAmount').textContent = exp;
+    document.getElementById('expDetail').textContent = `10 EXP x ${correct} the dung`;
+    document.getElementById('accuracyText').textContent = accuracy + '%';
+
+    const fill = document.getElementById('accuracyFill');
+    setTimeout(() => {
+        fill.style.width = accuracy + '%';
+    }, 300);
+
+    if (accuracy >= 80) {
+        fill.className = 'accuracy-fill';
+        document.getElementById('resultTitle').textContent = 'Xuat sac!';
+        document.getElementById('resultSubtitle').textContent = 'Ban da nam vung kien thuc!';
+    } else if (accuracy >= 50) {
+        fill.className = 'accuracy-fill medium';
+        document.getElementById('resultTitle').textContent = 'Kha tot!';
+        document.getElementById('resultSubtitle').textContent = 'Hay on tap them de tot hon!';
+    } else {
+        fill.className = 'accuracy-fill low';
+        document.getElementById('resultTitle').textContent = 'Can co gang hon!';
+        document.getElementById('resultSubtitle').textContent = 'Hay hoc lai de ghi nho tot hon.';
+    }
+
+    // Relearn button
+    const deckId = result.deckId;
+    const btnRelearn = document.getElementById('btnRelearn');
+    if (wrong > 0 && deckId) {
+        btnRelearn.href = '/study?deckId=' + deckId;
+    } else {
+        btnRelearn.style.display = 'none';
+    }
+}
+
+async function loadResult() {
+    const localResult = JSON.parse(localStorage.getItem('studyResult') || '{}');
+    const userToken = token();
+
+    if (!userToken) {
+        renderResult(localResult);
+        return;
+    }
+
+    try {
+        const res = await fetch(API_BASE + '/study/result/latest', {
+            headers: headers()
+        });
+
+        if (!res.ok) {
+            throw new Error('latest-failed');
+        }
+        const data = await res.json();
+        const finalResult = (data.totalCards || data.correct || data.wrong) ? data : localResult;
+        renderResult(finalResult);
+    } catch (e) {
+        renderResult(localResult);
+    }
+}
+
+function toggleDropdown() {
+  const menu = document.getElementById('dropdownMenu');
+  if (menu) menu.classList.toggle('show');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.user-dropdown')) {
+    const menu = document.getElementById('dropdownMenu');
+    if (menu) menu.classList.remove('show');
+  }
+});
+
+async function renderAuth() {
+  const authArea = document.getElementById('authArea');
+  if (!token()) {
+    authArea.innerHTML = '<a th:href="@{/login}" href="/login" class="btn-login">Dang nhap</a>';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/users/me', { headers: headers() });
+    if (!res.ok) throw new Error();
+    const user = await res.json();
+    localStorage.setItem('user', JSON.stringify(user));
+    const initial = (user.fullname || user.username || 'U').charAt(0).toUpperCase();
+    authArea.innerHTML = `
+      <div class="user-dropdown">
+        <div class="user-avatar" onclick="toggleDropdown()">${initial}</div>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a th:href="@{/profile}" href="/profile"><i class="fa-solid fa-user"></i> Ho so</a>
+          <a th:href="@{/mydeck}" href="/mydeck"><i class="fa-solid fa-folder"></i> Cua toi</a>
+          <a th:href="@{/achievement}" href="/achievement"><i class="fa-solid fa-trophy"></i> Thanh tich</a>
+          <a href="#" class="danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Dang xuat</a>
+        </div>
+      </div>`;
+  } catch {
+    authArea.innerHTML = '<a th:href="@{/login}" href="/login" class="btn-login">Dang nhap</a>';
+  }
+}
+
+function logout() {
+  const refreshToken = localStorage.getItem('refreshToken');
+  fetch(API_BASE + '/auth/logout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken: refreshToken || '' })
+  }).catch(() => {});
+  if (window.AuthStore) {
+    window.AuthStore.clear();
+  } else {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+  }
+  window.location.href = '/login';
+}
+
+(async function init() {
+  await renderAuth();
+  await loadResult();
+})();
+</script>
+
+</body>
+</html>
+
+
+

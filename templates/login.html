@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dang nhap - FlashLearn</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --bg: #F3F4F6;
+            --text: #1F2937;
+            --gray: #6B7280;
+            --white: #ffffff;
+            --radius: 16px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 440px;
+            padding: 1.5rem;
+        }
+        .login-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-header .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 0.5rem;
+        }
+        .login-header p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.8rem 0.8rem 0.8rem 2.8rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        .input-wrapper input:focus {
+            border-color: var(--primary);
+        }
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+        }
+        .form-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--gray);
+            cursor: pointer;
+        }
+        .form-options a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .form-options a:hover { text-decoration: underline; }
+        .btn-login {
+            width: 100%;
+            padding: 0.85rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-family: inherit;
+        }
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #E5E7EB;
+        }
+        .divider span { padding: 0 1rem; }
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            margin-bottom: 1.5rem;
+        }
+        .social-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s, background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        .social-btn:hover {
+            border-color: var(--primary);
+            background: #F9FAFB;
+        }
+        .social-btn.google { border-color: #E5E7EB; }
+        .social-btn.google:hover { border-color: #EA4335; background: #FEF2F2; }
+        .social-btn.github { border-color: #E5E7EB; }
+        .social-btn.github:hover { border-color: #333; background: #F6F8FA; }
+        .register-link {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        .register-link a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .register-link a:hover { text-decoration: underline; }
+        .error-message {
+            background: #FEF2F2;
+            color: #DC2626;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .error-message.show { display: flex; }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fa-solid fa-layer-group"></i> FlashLearn
+            </div>
+            <p>Dang nhap de bat dau hoc tap</p>
+        </div>
+
+        <div class="error-message" id="errorMsg">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="errorText">Sai email hoac mat khau</span>
+        </div>
+
+        <!-- Social Login - Google tren, GitHub duoi -->
+        <div class="social-login">
+            <button class="social-btn google" onclick="loginGoogle()">
+                <i class="fa-brands fa-google" style="color: #EA4335; font-size: 1.1rem;"></i> Dang nhap voi Google
+            </button>
+            <button class="social-btn github" onclick="loginGithub()">
+                <i class="fa-brands fa-github" style="color: #333; font-size: 1.1rem;"></i> Dang nhap voi GitHub
+            </button>
+        </div>
+
+        <div class="divider"><span>hoac dang nhap bang email</span></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Email</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Nhap email cua ban" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Mat khau</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" placeholder="Nhap mat khau" required>
+                </div>
+            </div>
+
+            <div class="form-options">
+                <label>
+                    <input type="checkbox"> Ghi nho dang nhap
+                </label>
+                <a href="#">Quen mat khau?</a>
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fa-solid fa-right-to-bracket"></i> Dang nhap
+            </button>
+        </form>
+
+        <div class="register-link" style="margin-top: 1.5rem;">
+            Chua co tai khoan? <a th:href="@{/register}" href="/register">Dang ky ngay</a>
+        </div>
+    </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+
+function loginGoogle() {
+    // TODO: Integrate real Google OAuth
+    alert('Chuc nang dang nhap bang Google dang duoc phat trien!');
+}
+
+function loginGithub() {
+    // TODO: Integrate real GitHub OAuth
+    alert('Chuc nang dang nhap bang GitHub dang duoc phat trien!');
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorMsg = document.getElementById('errorMsg');
+    const errorText = document.getElementById('errorText');
+
+    try {
+        const res = await fetch(API_BASE + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (window.AuthStore) {
+                window.AuthStore.setTokens(data.token, data.refreshToken);
+            } else {
+                localStorage.setItem('token', data.token);
+                if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+            }
+            localStorage.setItem('user', JSON.stringify(data.user || data));
+            window.location.href = '/library';
+        } else {
+            const err = await res.json().catch(() => ({}));
+            errorText.textContent = err.message || 'Sai email hoac mat khau!';
+            errorMsg.classList.add('show');
+        }
+    } catch (error) {
+        errorText.textContent = 'Khong the ket noi den server!';
+        errorMsg.classList.add('show');
+    }
+}
+</script>
+
+</body>
+</html>
+
+
+
