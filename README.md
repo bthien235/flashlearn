@@ -82,3 +82,4 @@ After that, every push to `main` will:
 - SSH to VPS and run `docker compose -f docker-compose.prod.yml pull app && docker compose -f docker-compose.prod.yml up -d`
 
 CI/CD smoke test note: update README to trigger workflow.
+CI/CD smoke test note 2: trigger workflow after SSH key fix.
