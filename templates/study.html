@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hoc Flashcard - FlashLearn</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --success: #10B981;
+      --danger: #EF4444;
+      --bg: #F3F4F6;
+      --text: #1F2937;
+      --gray: #6B7280;
+      --white: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .flashcard-page {
+      width: 100%;
+      max-width: 520px;
+      padding: 2rem;
+    }
+
+    /* Top bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .top-bar a {
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.3s;
+    }
+
+    .top-bar a:hover { color: var(--primary); }
+
+    .deck-name {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #E5E7EB;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4F46E5, #7C3AED);
+      transition: 0.3s;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .stat-value.correct { color: var(--success); }
+    .stat-value.wrong { color: var(--danger); }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+
+    .card-wrapper {
+      perspective: 1200px;
+    }
+
+    .flashcard {
+      height: 360px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      cursor: pointer;
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .card-front h1 {
+      color: var(--primary);
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-front .hint {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 0.5rem;
+    }
+
+    .card-front img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      color: white;
+    }
+
+    .card-back img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .card-back h2 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-back p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .label {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .audio-btn {
+      margin-top: 1rem;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .audio-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn.primary { background: var(--primary); color: white; }
+    .btn.secondary { background: #E5E7EB; color: var(--text); }
+    .btn.success { background: var(--success); color: white; }
+
+    /* Keyboard hint */
+    .keyboard-hint {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+
+    .keyboard-hint kbd {
+      background: #E5E7EB;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .flashcard { height: 300px; }
+      .card-front h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="flashcard-page">
+
+  <div class="top-bar">
+    <a th:href="@{/mydeck}" href="/mydeck"><i class="fa-solid fa-arrow-left"></i> Thoat</a>
+    <span class="deck-name" id="deckName">HTML & CSS</span>
+  </div>
+
+  <div class="header">
+    <span>Tien trinh</span>
+    <span id="counter">1 / 4</span>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value correct" id="correctCount">0</div>
+      <div class="stat-label">Da nho</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value wrong" id="wrongCount">0</div>
+      <div class="stat-label">Chua nho</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="expGained" style="color: #F59E0B;">0</div>
+      <div class="stat-label">EXP</div>
+    </div>
+  </div>
+
+  <div class="card-wrapper">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+
+      <!-- FRONT -->
+      <div class="card-face card-front">
+        <div class="label">Mat truoc</div>
+        <h1 id="frontText"></h1>
+        <img id="frontImg" src="" style="display:none">
+        <p class="hint" id="frontHint"></p>
+      </div>
+
+      <!-- BACK -->
+      <div class="card-face card-back">
+        <div class="label">Mat sau</div>
+        <h2 id="backTitle"></h2>
+        <img id="backImg" src="" style="display:none">
+        <p id="backDesc"></p>
+        <button class="audio-btn" onclick="playSound(event)">
+          <i class="fa-solid fa-volume-high"></i> Phat am
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn secondary" onclick="markWrong()">
+      <i class="fa-solid fa-rotate-left"></i> Chua nho
+    </button>
+    <button class="btn primary" onclick="flipCard()">
+      <i class="fa-solid fa-rotate"></i> Lat the
+    </button>
+    <button class="btn success" onclick="markCorrect()">
+      <i class="fa-solid fa-check"></i> Da nho
+    </button>
+  </div>
+
+  <div class="keyboard-hint">
+    <kbd>Space</kbd> Lat the &nbsp; <kbd>&larr;</kbd> Chua nho &nbsp; <kbd>&rarr;</kbd> Da nho
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+const urlParams = new URLSearchParams(window.location.search);
+const deckId = urlParams.get('deckId');
+
+let cards = [];
+let index = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let expGained = 0;
+const EXP_PER_CORRECT = 10;
+
+const flashcard = document.getElementById("flashcard");
+const frontText = document.getElementById("frontText");
+const backTitle = document.getElementById("backTitle");
+const backDesc = document.getElementById("backDesc");
+const frontImg = document.getElementById("frontImg");
+const backImg = document.getElementById("backImg");
+const counter = document.getElementById("counter");
+const progress = document.getElementById("progress");
+
+function loadCard() {
+  if (!cards.length) {
+    frontText.innerText = "Chua co du lieu";
+    backTitle.innerText = "Hay quay lai thu vien";
+    backDesc.innerText = "Bo the nay chua co flashcard de hoc.";
+    counter.innerText = "0 / 0";
+    progress.style.width = "0%";
+    return;
+  }
+  const c = cards[index];
+  frontText.innerText = c.front;
+  backTitle.innerText = c.back;
+  backDesc.innerText = c.desc || '';
+
+  if (c.image) {
+    frontImg.src = c.image;
+    frontImg.style.display = '';
+    backImg.src = c.image;
+    backImg.style.display = '';
+  } else {
+    frontImg.style.display = 'none';
+    backImg.style.display = 'none';
+  }
+
+  counter.innerText = `${index + 1} / ${cards.length}`;
+  progress.style.width = `${((index + 1) / cards.length) * 100}%`;
+}
+
+function flipCard() {
+  flashcard.classList.toggle("flipped");
+}
+
+function markCorrect() {
+  correctCount++;
+  expGained += EXP_PER_CORRECT;
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('expGained').textContent = expGained;
+  nextCard();
+}
+
+function markWrong() {
+  wrongCount++;
+  document.getElementById('wrongCount').textContent = wrongCount;
+  nextCard();
+}
+
+function nextCard() {
+  flashcard.classList.remove("flipped");
+  index++;
+
+  if (index >= cards.length) {
+    // Study session finished
+    const result = {
+      deckId: deckId,
+      totalCards: cards.length,
+      correct: correctCount,
+      wrong: wrongCount,
+      expGained: expGained
+    };
+    localStorage.setItem('studyResult', JSON.stringify(result));
+
+    // Send result to API
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch(API_BASE + '/study/result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(result)
+      }).catch(() => {});
+    }
+
+    window.location.href = '/result';
+    return;
+  }
+
+  setTimeout(loadCard, 200);
+}
+
+function playSound(e) {
+  e.stopPropagation();
+  const text = cards[index].textToSpeak || cards[index].front;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  speechSynthesis.speak(utterance);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    flipCard();
+  } else if (e.code === 'ArrowRight') {
+    markCorrect();
+  } else if (e.code === 'ArrowLeft') {
+    markWrong();
+  }
+});
+
+// Load cards from API or use defaults
+async function loadDeck() {
+  let targetDeckId = deckId;
+  if (!targetDeckId) {
+    try {
+      const token = localStorage.getItem('token');
+      const libRes = await fetch(API_BASE + '/library/decks', {
+        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+      });
+      if (libRes.ok) {
+        const list = await libRes.json();
+        if (Array.isArray(list) && list.length > 0) {
+          targetDeckId = list[0].id;
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (targetDeckId) {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(API_BASE + '/decks/' + targetDeckId + '/flashcards', {
+        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          cards = data.map(c => ({
+            front: c.front || c.question,
+            back: c.back || c.answer,
+            desc: c.note || c.description || '',
+            image: c.imageUrl || '',
+            textToSpeak: c.front || c.question
+          }));
+        }
+      }
+    } catch (e) {
+      // keep empty cards
+    }
+    document.getElementById('deckName').textContent = 'Bo the #' + targetDeckId;
+  }
+  loadCard();
+}
+
+loadDeck();
+</script>
+
+</body>
+</html>
+
+
+

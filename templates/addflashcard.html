@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Them Flashcard - FlashLearn</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --success: #10B981;
+      --danger: #EF4444;
+      --bg: #F3F4F6;
+      --text: #1F2937;
+      --gray: #6B7280;
+      --white: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: var(--white);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .back-btn:hover { color: var(--primary); }
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .card-count {
+      background: var(--primary);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Flashcard Form */
+    .flashcard-form {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+
+    .form-group label .required { color: var(--danger); }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .image-upload {
+      border: 2px dashed #D1D5DB;
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .image-upload:hover {
+      border-color: var(--primary);
+      background: #F9FAFB;
+    }
+
+    .image-upload i {
+      font-size: 1.5rem;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .image-upload span {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 0.7rem 1.5rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-add {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-add:hover { background: var(--primary-dark); }
+
+    .btn-done {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-done:hover { opacity: 0.9; }
+
+    .btn-cancel {
+      background: #E5E7EB;
+      color: var(--text);
+    }
+
+    /* Card List */
+    .card-list-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-item {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #E5E7EB;
+      transition: transform 0.2s;
+    }
+
+    .card-item:hover { transform: translateX(4px); }
+
+    .card-item-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+    }
+
+    .card-number {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .card-info { flex: 1; }
+    .card-front-text { font-weight: 600; font-size: 0.95rem; }
+    .card-back-text { font-size: 0.8rem; color: var(--gray); }
+
+    .card-item-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .icon-btn.edit-btn { background: #EFF6FF; color: var(--primary); }
+    .icon-btn.delete-btn { background: #FEF2F2; color: var(--danger); }
+    .icon-btn:hover { opacity: 0.8; }
+
+    .empty-list {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray);
+    }
+
+    .empty-list i {
+      font-size: 2.5rem;
+      margin-bottom: 0.8rem;
+      color: #D1D5DB;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a th:href="@{/}" href="/" class="logo"><i class="fa-solid fa-layer-group"></i> FlashLearn</a>
+    <a th:href="@{/mydeck}" href="/mydeck" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Quay lai</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h1><i class="fa-solid fa-cards-blank" style="color: var(--primary);"></i> Them Flashcard</h1>
+    <div class="card-count" id="cardCount">0 the</div>
+  </div>
+
+  <!-- Add Card Form -->
+  <div class="flashcard-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Mat truoc (Tieng Anh) <span class="required">*</span></label>
+        <input type="text" id="frontText" placeholder="VD: Algorithm">
+      </div>
+      <div class="form-group">
+        <label>Mat sau (Tieng Viet) <span class="required">*</span></label>
+        <input type="text" id="backText" placeholder="VD: Thuat toan">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Ghi chu / Vi du</label>
+      <textarea id="noteText" placeholder="VD: An algorithm is a step-by-step procedure..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Hinh anh (tuy chon)</label>
+      <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span id="imageLabel">Click de tai anh len hoac keo tha</span>
+        <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageSelect(this)">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-cancel" onclick="clearForm()">
+        <i class="fa-solid fa-eraser"></i> Xoa form
+      </button>
+      <button class="btn btn-add" onclick="addCard()">
+        <i class="fa-solid fa-plus"></i> Them the
+      </button>
+    </div>
+  </div>
+
+  <!-- Card List -->
+  <div class="card-list-title">
+    <i class="fa-solid fa-list" style="color: var(--primary);"></i> Danh sach the da them
+  </div>
+
+  <div id="cardList">
+    <div class="empty-list" id="emptyList">
+      <i class="fa-solid fa-inbox"></i>
+      <p>Chua co the nao. Hay them the dau tien!</p>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 2rem;">
+    <button class="btn btn-done" onclick="finishDeck()" style="padding: 0.85rem 3rem; font-size: 1rem;">
+      <i class="fa-solid fa-check-double"></i> Hoan thanh bo the
+    </button>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+const API_BASE = '/api';
+const urlParams = new URLSearchParams(window.location.search);
+const deckId = urlParams.get('deckId');
+let cards = [];
+let editIndex = -1;
+
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+function handleImageSelect(input) {
+    if (input.files && input.files[0]) {
+        document.getElementById('imageLabel').textContent = input.files[0].name;
+    }
+}
+
+async function addCard() {
+    const front = document.getElementById('frontText').value.trim();
+    const back = document.getElementById('backText').value.trim();
+    const note = document.getElementById('noteText').value.trim();
+
+    if (!front || !back) {
+        alert('Vui long nhap mat truoc va mat sau!');
+        return;
+    }
+
+    try {
+        if (!deckId) {
+            if (editIndex >= 0) {
+                cards[editIndex] = { ...cards[editIndex], front, back, note };
+                editIndex = -1;
+            } else {
+                cards.push({ front, back, note });
+            }
+        } else if (editIndex >= 0 && cards[editIndex] && cards[editIndex].id) {
+            const cardId = cards[editIndex].id;
+            const res = await fetch(API_BASE + '/decks/' + deckId + '/flashcards/' + cardId, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                body: JSON.stringify({ front, back, note })
+            });
+
+            if (!res.ok) {
+                throw new Error('update-failed');
+            }
+            const updated = await res.json();
+            cards[editIndex] = { ...updated, front: updated.front || front, back: updated.back || back, note: updated.note || note };
+            editIndex = -1;
+        } else {
+            const res = await fetch(API_BASE + '/decks/' + deckId + '/flashcards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                body: JSON.stringify({ front, back, note })
+            });
+
+            if (!res.ok) {
+                throw new Error('create-failed');
+            }
+            const created = await res.json();
+            cards.push({ ...created, front: created.front || front, back: created.back || back, note: created.note || note });
+        }
+
+        clearForm();
+        renderCards();
+    } catch (e) {
+        alert('Khong the luu flashcard. Vui long thu lai!');
+    }
+}
+
+function clearForm() {
+    document.getElementById('frontText').value = '';
+    document.getElementById('backText').value = '';
+    document.getElementById('noteText').value = '';
+    document.getElementById('imageLabel').textContent = 'Click de tai anh len hoac keo tha';
+    editIndex = -1;
+}
+
+function editCard(index) {
+    const card = cards[index];
+    document.getElementById('frontText').value = card.front;
+    document.getElementById('backText').value = card.back;
+    document.getElementById('noteText').value = card.note || '';
+    editIndex = index;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteCard(index) {
+    const card = cards[index];
+    if (!card) {
+        return;
+    }
+
+    try {
+        if (deckId && card.id) {
+            const res = await fetch(API_BASE + '/decks/' + deckId + '/flashcards/' + card.id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + getToken() }
+            });
+            if (!res.ok) {
+                throw new Error('delete-failed');
+            }
+        }
+        cards.splice(index, 1);
+        renderCards();
+    } catch (e) {
+        alert('Khong the xoa flashcard. Vui long thu lai!');
+    }
+}
+
+function renderCards() {
+    const list = document.getElementById('cardList');
+    const empty = document.getElementById('emptyList');
+    document.getElementById('cardCount').textContent = cards.length + ' the';
+
+    if (cards.length === 0) {
+        empty.style.display = '';
+        list.innerHTML = '';
+        list.appendChild(empty);
+        return;
+    }
+
+    empty.style.display = 'none';
+    let html = '';
+    cards.forEach((card, i) => {
+        html += `
+        <div class="card-item">
+            <div class="card-item-content">
+                <div class="card-number">${i + 1}</div>
+                <div class="card-info">
+                    <div class="card-front-text">${card.front}</div>
+                    <div class="card-back-text">${card.back}</div>
+                </div>
+            </div>
+            <div class="card-item-actions">
+                <button class="icon-btn edit-btn" onclick="editCard(${i})"><i class="fa-solid fa-pen"></i></button>
+                <button class="icon-btn delete-btn" onclick="deleteCard(${i})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+function finishDeck() {
+    if (cards.length === 0) {
+        alert('Vui long them it nhat 1 the!');
+        return;
+    }
+    window.location.href = '/mydeck';
+}
+
+async function loadExistingCards() {
+    if (!deckId) {
+        return;
+    }
+
+    try {
+        const res = await fetch(API_BASE + '/decks/' + deckId + '/flashcards', {
+            headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        if (!res.ok) {
+            return;
+        }
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            cards = data.map(item => ({
+                id: item.id,
+                front: item.front || '',
+                back: item.back || '',
+                note: item.note || ''
+            }));
+            renderCards();
+        }
+    } catch (e) {
+        // Keep UI usable if load fails.
+    }
+}
+
+// Check auth
+if (!getToken()) {
+    window.location.href = '/login';
+}
+
+loadExistingCards();
+</script>
+
+</body>
+</html>
+
+
+
