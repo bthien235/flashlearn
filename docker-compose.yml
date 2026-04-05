@@ -1,0 +1,67 @@
+services:
+  # ============================================
+  # MySQL Database
+  # ============================================
+  db:
+    image: mysql:8.0
+    container_name: flashlearn-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: flashlearn
+      MYSQL_USER: ${DB_USERNAME:-flashlearn}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-flashlearn123}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - flashlearn-db-data:/var/lib/mysql
+    networks:
+      - flashlearn-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ============================================
+  # FlashLearn Application
+  # ============================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    develop:
+      watch:
+        - action: rebuild
+          path: ./src
+        - action: rebuild
+          path: ./pom.xml
+        - action: rebuild
+          path: ./Dockerfile
+    container_name: flashlearn-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/flashlearn?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: ${DB_USERNAME:-flashlearn}
+      DB_PASSWORD: ${DB_PASSWORD:-flashlearn123}
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-very-long-random-secret-key-in-production}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
+      JWT_REFRESH_EXPIRATION_DAYS: ${JWT_REFRESH_EXPIRATION_DAYS:-30}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-update}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    networks:
+      - flashlearn-network
+
+volumes:
+  flashlearn-db-data:
+    driver: local
+
+networks:
+  flashlearn-network:
+    driver: bridge
